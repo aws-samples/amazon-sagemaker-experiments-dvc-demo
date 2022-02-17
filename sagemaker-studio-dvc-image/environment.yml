@@ -1,0 +1,16 @@
+name: dvc
+channels:
+  - conda-forge
+  - intel
+dependencies:
+  - python=3.8
+  - awscli
+  - boto3
+  - dvc
+  - dvc-s3
+  - scikit-learn
+  - sagemaker-studio-image-build
+  - sagemaker
+  - s3fs
+  - ipykernel
+
