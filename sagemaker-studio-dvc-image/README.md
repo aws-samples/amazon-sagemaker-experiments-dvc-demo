@@ -6,24 +6,20 @@ The advantage of creating an image and make it available to all SageMaker Studio
 This tutorial is heavily inspired by [this example](https://github.com/aws-samples/sagemaker-studio-custom-image-samples/tree/main/examples/conda-env-kernel-image).
 Further information about custom images for SageMaker Studio can be found [here](https://docs.aws.amazon.com/sagemaker/latest/dg/studio-byoi.html)
 
-### Prerequisite
+## Prerequisite
 
-* An AWS account
-* an IAM user with enough permissions (`AmazonEC2ContainerRegistryFullAccess`, and `SageMakerFullAccess`)
-* a SageMaker Domain already created
+* A Cloud9 environment with enough permissions
 
-### Overview
+## Overview
 
 This custom image sample demonstrates how to create a custom Conda environment in a Docker image and use it as a custom kernel in SageMaker Studio.
 
 The Conda environment must have the appropriate kernel package installed, for e.g., `ipykernel` for a Python kernel. This example creates a Conda environment called `myenv` with a few Python packages (see [environment.yml](environment.yml)) and the `ipykernel`. SageMaker Studio will automatically recognize this Conda environment as a kernel named `conda-env-myenv-py` (See  [app-image-config-input.json](app-image-config-input.json))
 
-### Building the image
-
-## Resize Cloud9
+### Resize Cloud9
 
 ```bash
-cd ~/sagemaker-dvc-catboost-demo/sagemaker-studio-dvc-image
+cd ~/amazon-sagemaker-experiments-dvc-demo/sagemaker-studio-dvc-image
 ./resize-cloud9.sh 20
 ```
 Set the enviromental variables
@@ -32,12 +28,16 @@ Set the enviromental variables
 sudo yum install jq -y
 export REGION=$(curl -s 169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
 echo "export REGION=${REGION}" | tee -a ~/.bash_profile
+
 export ACCOUNT_ID=$(aws sts get-caller-identity | jq -r '.Account')
 echo "export ACCOUNT_ID=${ACCOUNT_ID}" | tee -a ~/.bash_profile
+
 export IMAGE_NAME=conda-env-dvc-kernel
 echo "export IMAGE_NAME=${IMAGE_NAME}" | tee -a ~/.bash_profile
 ```
+
 Build the Docker image and push to Amazon ECR.
+
 ```bash
 # Build and push the image
 aws --region ${REGION} ecr get-login-password | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom
@@ -46,13 +46,20 @@ docker build . -t ${IMAGE_NAME} -t ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
 docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAGE_NAME}
 ```
 
-### Using with SageMaker Studio
+### Create a new SageMaker Studio
+( Skip to [Update an existing SageMaker Studio](#update-an-existing-sagemaker-studio) )
+
+To streamline the process of creating SageMaker Studio and attach a custom image, we provide a CDK implmenetation that you can just deploy on your account.
+
+### Update an existing SageMaker Studio
+
+If you have an existing SageMaker Studio environment, we need to configure manually a few parameters to correctly attach and make the image available to SageMaker Studio.
 
 Create a SageMaker Image (SMI) with the image in ECR. 
 
 ```bash
 # Role in your account to be used for SMI. Modify as required.
-export ROLE_ARN=arn:aws:iam::${ACCOUNT_ID}:role/RoleName
+export ROLE_ARN=<the-existing-sagemaker-studio-execution-role-arn>
 ```
 
 ```bash
@@ -74,21 +81,8 @@ Create a AppImageConfig for this image
 aws --region ${REGION} sagemaker create-app-image-config --cli-input-json file://app-image-config-input.json
 ```
 
-Create a Domain, providing the SageMaker Image and AppImageConfig in the Domain input. Replace the placeholders for VPC ID, Subnet IDs, and Execution Role in `create-domain-input.json`
-
-Find the default vpc id, and its public subnets
-```bash
-aws ec2 describe-vpcs --filters Name=is-default,Values=true | jq -r '.Vpcs[].VpcId'
-```
-```bash
-aws ec2 describe-subnets --filters Name=vpc-id,Values=$(aws ec2 describe-vpcs --filters Name=is-default,Values=true | jq -r '.Vpcs[].VpcId') | jq -r '.Subnets[].SubnetId'
-```
-
-```bash
-aws --region ${REGION} sagemaker create-domain --cli-input-json file://create-domain-input.json
-```
-
-If you have an existing Domain, you can also use the `update-domain`
+Open `update-domain-input.json` and replace `<your-sagemaker-studio-domain-id>` with the SageMaker Studio domain ID.
+Save the file and continue.
 
 ```bash
 aws --region ${REGION} sagemaker update-domain --cli-input-json file://update-domain-input.json
