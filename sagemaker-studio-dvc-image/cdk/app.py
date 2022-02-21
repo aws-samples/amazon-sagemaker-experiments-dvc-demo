@@ -7,8 +7,8 @@ import os
 import boto3
 
 sts_client = boto3.client("sts")
-account_id = os.environ.get('CDK_DEFAULT_ACCOUNT', sts_client.get_caller_identity()["Account"])
-region = os.environ.get('CDK_DEFAULT_REGION', 'eu-west-1')
+account_id = os.environ.get('ACCOUNT_ID', sts_client.get_caller_identity()["Account"])
+region = os.environ.get('REGION', 'eu-west-1')
 
 app = core.App()
 SagemakerStudioStack(app, "sagemakerStudioCDK", env={"account": account_id, 'region': region})
