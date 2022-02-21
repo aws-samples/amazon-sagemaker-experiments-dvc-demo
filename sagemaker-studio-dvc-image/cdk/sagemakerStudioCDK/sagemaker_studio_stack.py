@@ -51,14 +51,14 @@ class SagemakerStudioStack(core.Stack):
 		
 		cfn_image = sagemaker.CfnImage(
 			self,
-			"MyCfnImage",
+			"DvcImage",
     		image_name="conda-env-dvc-kernel",
     		image_role_arn=role_sagemaker_studio_domain.role_arn,
 		)
 		
 		cfn_image_version = sagemaker.CfnImageVersion(
 			self,
-			"MyCfnImageVersion",
+			"DvcImageVersion",
 			image_name="conda-env-dvc-kernel",
 			base_image="{}.dkr.ecr.{}.amazonaws.com/smstudio-custom:conda-env-dvc-kernel".format(self.account, self.region)
 		)
@@ -67,7 +67,7 @@ class SagemakerStudioStack(core.Stack):
 		
 		cfn_app_image_config = sagemaker.CfnAppImageConfig(
 			self,
-			"MyCfnAppImageConfig",
+			"DvcAppImageConfig",
     		app_image_config_name="conda-env-dvc-kernel-config",
     		kernel_gateway_image_config=sagemaker.CfnAppImageConfig.KernelGatewayImageConfigProperty(
         		kernel_specs=[
@@ -88,7 +88,7 @@ class SagemakerStudioStack(core.Stack):
 		
 		my_sagemaker_domain = sagemaker.CfnDomain(
 			self,
-			"MyCfnDomain",
+			"SageMakerStudioDomain",
 		    auth_mode="IAM",
 		    default_user_settings=sagemaker.CfnDomain.UserSettingsProperty(
 		        execution_role=self.role_sagemaker_studio_domain.role_arn,
