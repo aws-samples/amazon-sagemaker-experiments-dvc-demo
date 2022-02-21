@@ -23,17 +23,95 @@ class SagemakerStudioStack(core.Stack):
 	    	),
 		    role_name="RoleSagemakerStudioUsers",
 		    managed_policies=[
-				iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSageMakerFullAccess")
+				iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSageMakerFullAccess"),
 			],
 			inline_policies={
 				"s3bucket": iam.PolicyDocument(
     				statements=[
     					iam.PolicyStatement(
     						effect=iam.Effect.ALLOW,
-        					actions=["s3:ListBucket","s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:PutObjectTagging"],
-        					resources=["*"]
+							actions=["s3:ListBucket","s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:PutObjectTagging"],
+							resources=["*"]
     					)
     				]
+				),
+				"sm-build-policy": iam.PolicyDocument(
+					statements=[
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=[
+								"ecr:CreateRepository",
+								"ecr:BatchGetImage",
+								"ecr:CompleteLayerUpload",
+								"ecr:DescribeImages",
+								"ecr:DescribeRepositories",
+								"ecr:UploadLayerPart",
+								"ecr:ListImages",
+								"ecr:InitiateLayerUpload", 
+								"ecr:BatchCheckLayerAvailability",
+								"ecr:PutImage"	
+							],
+							resources=["arn:aws:ecr:*:*:repository/sagemaker-studio*"]
+						),
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=[
+								"codebuild:DeleteProject",
+                				"codebuild:CreateProject",
+				                "codebuild:BatchGetBuilds",
+				                "codebuild:StartBuild"
+							],
+							resources=["arn:aws:codebuild:*:*:project/sagemaker-studio*"]
+						),
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=["logs:CreateLogStream"],
+							resources=["arn:aws:logs:*:*:log-group:/aws/codebuild/sagemaker-studio*"]
+						),
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=[
+				                "logs:GetLogEvents",
+				                "logs:PutLogEvents"							
+							],
+							resources=["arn:aws:logs:*:*:log-group:/aws/codebuild/sagemaker-studio*:log-stream:*"]
+						),
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=[
+								"logs:CreateLogGroup"
+							],
+							resources=["*"]
+						),
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=["ecr:GetAuthorizationToken"],
+							resources=["*"]
+						),
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=["s3:CreateBucket"],
+							resources=["arn:aws:s3:::sagemaker*"]
+						),
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=[
+								"iam:GetRole",
+                				"iam:ListRoles"
+                			],
+                			resources=["*"]
+						),
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=["iam:PassRole"],
+							resources=["arn:aws:iam::*:role/*"],
+							conditions={
+								"StringLikeIfExists":{
+									"iam:PassedToService":"codebuild.amazonaws.com"
+								}
+							}
+						)
+					]	
 				)
 			}
 		)
@@ -113,9 +191,12 @@ class SagemakerStudioStack(core.Stack):
 			self,
 			"CfnUserProfile",
 			domain_id=my_sagemaker_domain.attr_domain_id,
-			user_profile_name=team
+			user_profile_name=team,
+			user_settings=sagemaker.CfnUserProfile.UserSettingsProperty(
+		        execution_role=self.role_sagemaker_studio_domain.role_arn
+		    )
 		)
-		
+
 		core.CfnOutput(
 			self,
 			f"cfnoutput{team}",
