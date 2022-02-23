@@ -24,6 +24,8 @@ class SagemakerStudioStack(core.Stack):
 		    role_name="RoleSagemakerStudioUsers",
 		    managed_policies=[
 				iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSageMakerFullAccess"),
+				iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeBuildAdminAccess"),
+                iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeCommitFullAccess")
 			],
 			inline_policies={
 				"s3bucket": iam.PolicyDocument(
@@ -37,6 +39,23 @@ class SagemakerStudioStack(core.Stack):
 				),
 				"sm-build-policy": iam.PolicyDocument(
 					statements=[
+						iam.PolicyStatement(
+							sid="EcrAuthorizationTokenRetrieval",
+							effect=iam.Effect.ALLOW,
+							actions=[
+								"ecr:BatchGetImage",
+								"ecr:GetDownloadUrlForLayer"
+							],
+							resources=[
+								"arn:aws:ecr:*:763104351884:repository/*",
+				                "arn:aws:ecr:*:217643126080:repository/*",
+				                "arn:aws:ecr:*:727897471807:repository/*",
+				                "arn:aws:ecr:*:626614931356:repository/*",
+				                "arn:aws:ecr:*:683313688378:repository/*",
+				                "arn:aws:ecr:*:520713654638:repository/*",
+				                "arn:aws:ecr:*:462105765813:repository/*"
+							]
+						),
 						iam.PolicyStatement(
 							effect=iam.Effect.ALLOW,
 							actions=[
