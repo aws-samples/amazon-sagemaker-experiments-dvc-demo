@@ -50,6 +50,9 @@ docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAG
 ( Skip to [Update an existing SageMaker Studio](#update-an-existing-sagemaker-studio) )
 
 To streamline the process of creating SageMaker Studio and attach a custom image, we provide a CDK implmenetation that you can just deploy on your account.
+This approach ensures that the right permissions are attached to the SageMaker execution role in order to correctly execute the notebook sample.
+
+Please follow the instruction [here](./cdk/README.md)
 
 ### Update an existing SageMaker Studio
 
@@ -61,6 +64,9 @@ Create a SageMaker Image (SMI) with the image in ECR.
 # Role in your account to be used for SMI. Modify as required.
 export ROLE_ARN=<the-existing-sagemaker-studio-execution-role-arn>
 ```
+
+Please ensure that the ROLE_ARN you are using has the right permissions.
+TODO: provide the list of permissions needed.
 
 ```bash
 aws --region ${REGION} sagemaker create-image \
