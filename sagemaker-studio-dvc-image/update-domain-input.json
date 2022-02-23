@@ -1,0 +1,13 @@
+{
+    "DomainId": "<your-sagemaker-studio-domain-id>",
+    "DefaultUserSettings": {
+        "KernelGatewayAppSettings": {
+            "CustomImages": [
+                {
+                    "ImageName": "conda-env-dvc-kernel",
+                    "AppImageConfigName": "conda-env-dvc-kernel-config"
+                }
+            ]
+        }
+    }
+}
