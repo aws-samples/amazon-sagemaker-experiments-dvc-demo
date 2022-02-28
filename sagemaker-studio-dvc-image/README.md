@@ -24,7 +24,7 @@ git clone https://github.com/aws-samples/amazon-sagemaker-experiments-dvc-demo
 ### Resize Cloud9
 
 ```bash
-cd ~/amazon-sagemaker-experiments-dvc-demo/sagemaker-studio-dvc-image
+cd amazon-sagemaker-experiments-dvc-demo/sagemaker-studio-dvc-image/
 ./resize-cloud9.sh 20
 ```
 Set the enviromental variables
