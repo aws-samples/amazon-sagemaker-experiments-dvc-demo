@@ -16,6 +16,11 @@ This custom image sample demonstrates how to create a custom Conda environment i
 
 The Conda environment must have the appropriate kernel package installed, for e.g., `ipykernel` for a Python kernel. This example creates a Conda environment called `myenv` with a few Python packages (see [environment.yml](environment.yml)) and the `ipykernel`. SageMaker Studio will automatically recognize this Conda environment as a kernel named `conda-env-myenv-py` (See  [app-image-config-input.json](app-image-config-input.json))
 
+### Clone the GitHub repository 
+```bash
+git clone https://github.com/aws-samples/amazon-sagemaker-experiments-dvc-demo
+```
+
 ### Resize Cloud9
 
 ```bash
