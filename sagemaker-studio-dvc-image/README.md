@@ -14,7 +14,9 @@ Further information about custom images for SageMaker Studio can be found [here]
 
 This custom image sample demonstrates how to create a custom Conda environment in a Docker image and use it as a custom kernel in SageMaker Studio.
 
-The Conda environment must have the appropriate kernel package installed, for e.g., `ipykernel` for a Python kernel. This example creates a Conda environment called `myenv` with a few Python packages (see [environment.yml](environment.yml)) and the `ipykernel`. SageMaker Studio will automatically recognize this Conda environment as a kernel named `conda-env-myenv-py` (See  [app-image-config-input.json](app-image-config-input.json))
+The Conda environment must have the appropriate kernel package installed, for e.g., `ipykernel` for a Python kernel.
+This example creates a Conda environment called `dvc` with a few Python packages (see [environment.yml](environment.yml)) and the `ipykernel`.
+SageMaker Studio will automatically recognize this Conda environment as a kernel named `conda-env-dvc-py`.
 
 ### Clone the GitHub repository 
 ```bash
@@ -52,7 +54,7 @@ docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAG
 ```
 
 ### Create a new SageMaker Studio
-( Skip to [Update an existing SageMaker Studio](#update-an-existing-sagemaker-studio) )
+( Skip to [Update an existing SageMaker Studio](#update-an-existing-sagemaker-studio) if you have already an existing SageMaker Studio domain)
 
 To streamline the process of creating SageMaker Studio and attach a custom image, we provide a CDK implmenetation that you can just deploy on your account.
 This approach ensures that the right permissions are attached to the SageMaker execution role in order to correctly execute the notebook sample.
@@ -69,6 +71,22 @@ Create a SageMaker Image (SMI) with the image in ECR.
 # Role in your account to be used for SMI. Modify as required.
 export ROLE_ARN=<the-existing-sagemaker-studio-execution-role-arn>
 ```
+
+Set the DOMAIN_ID environment variable with your domain ID
+
+```bash
+export DOMAIN_ID=$(aws sagemaker list-domains | jq -r '.Domains[0].DomainId')
+```
+
+Open `update-domain-input.json` and replace `<your-sagemaker-studio-domain-id>` with the SageMaker Studio domain ID.
+Save the file and continue.
+
+
+```
+sed 's/<your-sagemaker-studio-domain-id>/'"$DOMAIN_ID"'/' ../update-domain-input.json
+```
+
+Use CDK to create role, image, image version, and AppImageConfig.
 
 Please ensure that the ROLE_ARN you are using has the right permissions.
 TODO: provide the list of permissions needed.
