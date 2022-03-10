@@ -115,10 +115,10 @@ def get_hyperparameters():
     return hyperparameters_data
 
 
-def clone_dvc_git_repo(dvc_repo_url, dvc_tag):
+def clone_dvc_git_repo(dvc_repo_url, dvc_branch):
     print(f"Configure git to pull authenticated from CodeCommit")
-    print(f"Cloning repo: {dvc_repo_url}, git tag: {dvc_tag}")
-    subprocess.check_call(["git", "clone", "--depth", "1", "--branch", dvc_tag, dvc_repo_url, input_path])
+    print(f"Cloning repo: {dvc_repo_url}, git branch: {dvc_branch}")
+    subprocess.check_call(["git", "clone", "--depth", "1", "--branch", dvc_branch, dvc_repo_url, input_path])
 
 
 def dvc_pull():
@@ -130,7 +130,7 @@ def dvc_pull():
 if __name__ == '__main__':
 
     hyperparameters = get_hyperparameters()
-    clone_dvc_git_repo(hyperparameters["dvc-repo-url"], hyperparameters["dvc-tag"])
+    clone_dvc_git_repo(hyperparameters["dvc-repo-url"], hyperparameters["dvc-branch"])
     dvc_pull()
     train()
 
