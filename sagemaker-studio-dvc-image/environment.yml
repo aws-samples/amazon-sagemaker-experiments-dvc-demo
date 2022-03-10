@@ -6,14 +6,13 @@ dependencies:
   - python=3.8
   - pip=22.0.4
   - ipykernel=6.9.1
-  - dvc=2.8.3
-  - dvc-s3=2.8.3
-  - s3fs=2021.10.1
   - pip:
-    - awscli==1.22.67
-    - boto3==1.21.12
-    - botocore==1.24.12
-    - sagemaker==2.77.1
+    - dvc==2.8.3
+    - dvc[s3]==2.8.3
+    - s3fs==2021.11.0
+    - awscli
+    - boto3==1.17.106
+    - sagemaker
     - sagemaker-studio-image-build==0.6.0
     - sagemaker-experiments==0.1.35
     - scikit-learn==1.0.2
