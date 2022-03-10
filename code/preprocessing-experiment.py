@@ -16,16 +16,7 @@ from smexperiments.tracker import Tracker
 
 # Read data locally
 input_data_path = os.path.join("/opt/ml/processing/input", "dataset.csv")
-
-prefix = '/opt/ml/'
-input_path = prefix + 'processing/input'
-dataset_path = prefix + input_path
-train_channel_name = 'train'
-validation_channel_name = 'validation'
 base_dir = './sagemaker-dvc-sample/dataset'
-
-train_path = os.path.join(dataset_path, train_channel_name)
-validation_path = os.path.join(dataset_path, validation_channel_name)
 
 def clone_dvc_git_repo(dvc_repo_url):
     print(f"Cloning repo: {dvc_repo_url}")
@@ -73,7 +64,6 @@ def sync_data_with_dvc(branch):
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
-    print(parser)
     parser.add_argument("--train-test-split-ratio", type=float, default=0.3)
     parser.add_argument("--dvc-repo-url", type=str, default="codecommit::eu-west-1://sagemaker-dvc-sample")
     parser.add_argument("--dvc-branch", type=str, default="my-experiment")
