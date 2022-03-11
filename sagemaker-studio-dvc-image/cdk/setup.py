@@ -1,19 +1,13 @@
 import setuptools
 
 
-with open("README.md") as fp:
-    long_description = fp.read()
-
-
 setuptools.setup(
     name="sagemakerStudioCDK",
     version="0.0.1",
 
     description="aws-cdk-sagemaker-studio",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
 
-    author="haramine",
+    author="frpaolo",
 
     package_dir={"": "sagemakerStudioCDK"},
     packages=setuptools.find_packages(where="sagemakerStudioCDK"),

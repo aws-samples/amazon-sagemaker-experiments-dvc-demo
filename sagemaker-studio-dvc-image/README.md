@@ -26,7 +26,7 @@ git clone https://github.com/aws-samples/amazon-sagemaker-experiments-dvc-demo
 ### Resize Cloud9
 
 ```bash
-cd amazon-sagemaker-experiments-dvc-demo/sagemaker-studio-dvc-image/
+cd ~/environment/amazon-sagemaker-experiments-dvc-demo/sagemaker-studio-dvc-image/
 ./resize-cloud9.sh 20
 ```
 
@@ -51,6 +51,9 @@ Build the Docker image and push to Amazon ECR.
 ```bash
 # Login to ECR
 aws --region ${REGION} ecr get-login-password | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom
+
+# Create the ECR repository
+aws ecr create-repository --repository-name smstudio-custom
 
 # Build and push the image
 docker build . -t ${IMAGE_NAME} -t ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAGE_NAME}
@@ -80,6 +83,7 @@ source .cdk-venv/bin/activate
 Step 4: Install the required dependencies:
 
 ```bash
+pip3 install --upgrade pip
 pip3 install -r requirements.txt
 ```
 
@@ -106,7 +110,8 @@ If you have an existing SageMaker Studio environment, we need to first retrieve 
 Step 5: Set the `DOMAIN_ID` environment variable with your domain ID and save to your `bash_profile`.
 
 ```bash
-echo "export DOMAIN_ID=$(aws sagemaker list-domains | jq -r '.Domains[0].DomainId')" | tee -a ~/.bash_profile
+export DOMAIN_ID=$(aws sagemaker list-domains | jq -r '.Domains[0].DomainId')
+echo "export DOMAIN_ID=${DOMAIN_ID}" | tee -a ~/.bash_profile
 ```
 
 Step 6: deploy CDK (by setting the `DOMAIN_ID` environment variable, CDK will deploy a stack named: `sagemakerUserCDK` which you can verify on `CloudFormation`)
@@ -120,9 +125,6 @@ CDK will create the following resources via` CloudFormation`:
 * creates a SageMaker Image and a SageMaker Image Version from the docker image `conda-env-dvc-kernel` we have created earlier
 * creates an AppImageConfig which specify how the kernel gateway should be configured
 * provision a SageMaker Studio user, i.e., `data-scientist-dvc`, with the correct SageMaker execution role and makes available the custom SageMaker Studio image available to it
-
-Open `update-domain-input.json` and replace `<your-sagemaker-studio-domain-id>` with the SageMaker Studio domain ID.
-Save the file and continue.
 
 Step 7: Update the SageMaker Studio domain configuration
 
