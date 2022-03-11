@@ -1,0 +1,8 @@
+{
+    "DomainId": "<your-sagemaker-studio-domain-id>",
+    "DefaultUserSettings": {
+        "KernelGatewayAppSettings": {
+            "CustomImages": []
+        }
+    }
+}
