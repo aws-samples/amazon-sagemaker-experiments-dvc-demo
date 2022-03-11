@@ -29,7 +29,10 @@ git clone https://github.com/aws-samples/amazon-sagemaker-experiments-dvc-demo
 cd amazon-sagemaker-experiments-dvc-demo/sagemaker-studio-dvc-image/
 ./resize-cloud9.sh 20
 ```
-Set the enviromental variables
+
+## Prepare environment
+
+Set some basic environment variables
 
 ```bash
 sudo yum install jq -y
@@ -46,75 +49,110 @@ echo "export IMAGE_NAME=${IMAGE_NAME}" | tee -a ~/.bash_profile
 Build the Docker image and push to Amazon ECR.
 
 ```bash
-# Build and push the image
+# Login to ECR
 aws --region ${REGION} ecr get-login-password | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom
 
+# Build and push the image
 docker build . -t ${IMAGE_NAME} -t ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAGE_NAME}
 docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAGE_NAME}
+```
+
+Prepare the environment for the CDK deployment.
+
+Step 1: Change directories to the new directory that was created during the previous step:
+
+```bash
+cd ~/environment/amazon-sagemaker-experiments-dvc-demo/sagemaker-studio-dvc-image/cdk
+```
+
+Step 2: Create a virtual environment:
+
+```bash
+python3 -m venv .cdk-venv
+```
+
+Step 3: Activate the virtual environment after the init process completes, and the virtual environment is created:
+
+```bash
+source .cdk-venv/bin/activate
+```
+
+Step 4: Install the required dependencies:
+
+```bash
+pip3 install -r requirements.txt
 ```
 
 ### Create a new SageMaker Studio
 ( Skip to [Update an existing SageMaker Studio](#update-an-existing-sagemaker-studio) if you have already an existing SageMaker Studio domain)
 
-To streamline the process of creating SageMaker Studio and attach a custom image, we provide a CDK implmenetation that you can just deploy on your account.
-This approach ensures that the right permissions are attached to the SageMaker execution role in order to correctly execute the notebook sample.
+Step 5: deploy CDK (CDK will deploy a stack named: `sagemakerStudioCDK` which you can verify in `CloudFormation`)
 
-Please follow the instruction [here](./cdk/README.md)
+```bash
+cdk deploy --require-approval never
+```
+
+CDK will create the following resources via` CloudFormation`:
+* provisions a new SageMaker Studio domain
+* creates and attaches a SageMaker execution role, i.e., `RoleForSagemakerStudioUsers` with the right permissions to the SageMaker Studio domain
+* creates a SageMaker Image and a SageMaker Image Version from the docker image `conda-env-dvc-kernel` we have created earlier
+* creates an AppImageConfig which specify how the kernel gateway should be configured
+* provision a SageMaker Studio user, i.e., `data-scientist-dvc`, with the correct SageMaker execution role and makes available the custom SageMaker Studio image available to it
 
 ### Update an existing SageMaker Studio
 
-If you have an existing SageMaker Studio environment, we need to configure manually a few parameters to correctly attach and make the image available to SageMaker Studio.
+If you have an existing SageMaker Studio environment, we need to first retrieve the exising SageMaker Studio domain ID, deploy a "reduced" version of the CDK stack, and update the SageMaker Studio domain configuration.
 
-Create a SageMaker Image (SMI) with the image in ECR. 
-
-```bash
-# Role in your account to be used for SMI. Modify as required.
-export ROLE_ARN=<the-existing-sagemaker-studio-execution-role-arn>
-```
-
-Set the DOMAIN_ID environment variable with your domain ID
+Step 5: Set the `DOMAIN_ID` environment variable with your domain ID and save to your `bash_profile`.
 
 ```bash
-export DOMAIN_ID=$(aws sagemaker list-domains | jq -r '.Domains[0].DomainId')
+echo "export DOMAIN_ID=$(aws sagemaker list-domains | jq -r '.Domains[0].DomainId')" | tee -a ~/.bash_profile
 ```
+
+Step 6: deploy CDK (by setting the `DOMAIN_ID` environment variable, CDK will deploy a stack named: `sagemakerUserCDK` which you can verify on `CloudFormation`)
+
+```bash
+cdk deploy --require-approval never
+```
+
+CDK will create the following resources via` CloudFormation`:
+* creates and attaches a SageMaker execution role, i.e., `RoleForSagemakerStudioUsers` with the right permissions to your existing SageMaker Studio domain
+* creates a SageMaker Image and a SageMaker Image Version from the docker image `conda-env-dvc-kernel` we have created earlier
+* creates an AppImageConfig which specify how the kernel gateway should be configured
+* provision a SageMaker Studio user, i.e., `data-scientist-dvc`, with the correct SageMaker execution role and makes available the custom SageMaker Studio image available to it
 
 Open `update-domain-input.json` and replace `<your-sagemaker-studio-domain-id>` with the SageMaker Studio domain ID.
 Save the file and continue.
 
-
-```
-sed 's/<your-sagemaker-studio-domain-id>/'"$DOMAIN_ID"'/' ../update-domain-input.json
-```
-
-Use CDK to create role, image, image version, and AppImageConfig.
-
-Please ensure that the ROLE_ARN you are using has the right permissions.
-TODO: provide the list of permissions needed.
+Step 7: Update the SageMaker Studio domain configuration
 
 ```bash
-aws --region ${REGION} sagemaker create-image \
-    --image-name ${IMAGE_NAME} \
-    --role-arn ${ROLE_ARN}
+# inject your DOMAIN_ID into the configuration file
+sed -i 's/<your-sagemaker-studio-domain-id>/'"$DOMAIN_ID"'/' ../update-domain-input.json
 
-aws --region ${REGION} sagemaker create-image-version \
-    --image-name ${IMAGE_NAME} \
-    --base-image "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAGE_NAME}"
-
-# Verify the image-version is created successfully. Do NOT proceed if image-version is in CREATE_FAILED state or in any other state apart from CREATED.
-aws --region ${REGION} sagemaker describe-image-version --image-name ${IMAGE_NAME}
+# update the sagemaker studio domain
+aws --region ${REGION} sagemaker update-domain --cli-input-json file://../update-domain-input.json
 ```
 
-Create a AppImageConfig for this image
+Open the newly created SageMaker Studio user, i.e., `data-scientist-dvc`.
+
+### Execute the lab
+
+In the SageMaker Studio domain, launch `Studio` for the `data-scientist-dvc`.
+Open a terminal and clone the repository
 
 ```bash
-aws --region ${REGION} sagemaker create-app-image-config --cli-input-json file://app-image-config-input.json
+git clone https://github.com/aws-samples/amazon-sagemaker-experiments-dvc-demo
 ```
 
-Open `update-domain-input.json` and replace `<your-sagemaker-studio-domain-id>` with the SageMaker Studio domain ID.
-Save the file and continue.
+and open the [dvc_sagemaker_byoc.ipynb](../dvc_sagemaker_byoc.ipynb) notebook.
+
+### Cleanup
+
+Before removing all resources created, you need to make sure that all Apps are deleted from the `data-scientist-dvc` user, i.e. all `KernelGateway` apps, as well as the default `JupiterServer`.
+
+Once done, you can destroy the CDK stack by running
 
 ```bash
-aws --region ${REGION} sagemaker update-domain --cli-input-json file://update-domain-input.json
+cdk destroy
 ```
-
-Create a User Profile, and start a Notebook using the SageMaker Studio launcher.
