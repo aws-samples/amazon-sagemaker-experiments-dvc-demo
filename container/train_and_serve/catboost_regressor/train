@@ -70,10 +70,10 @@ def train():
 
         # Assumption is that the label is the last column
         print('building training and validation datasets')
-        X_train = train_df.iloc[:, :-1].values
-        y_train = train_df.iloc[:, -1:].values
-        X_validation = validation_df.iloc[:, :-1].values
-        y_validation = validation_df.iloc[:, -1:].values
+        X_train = train_df.iloc[:, 1:].values
+        y_train = train_df.iloc[:, 0:1].values
+        X_validation = validation_df.iloc[:, 1:].values
+        y_validation = validation_df.iloc[:, 0:1].values
 
         # define and train model
         model = CatBoostRegressor()
