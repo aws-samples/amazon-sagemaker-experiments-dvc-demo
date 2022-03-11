@@ -156,3 +156,13 @@ Once done, you can destroy the CDK stack by running
 ```bash
 cdk destroy
 ```
+
+In case you started off from an existing domain, please also execute the following command:
+
+```bash
+# inject your DOMAIN_ID into the configuration file
+sed -i 's/<your-sagemaker-studio-domain-id>/'"$DOMAIN_ID"'/' ../update-domain-no-custom-images.json
+
+# update the sagemaker studio domain
+aws --region ${REGION} sagemaker update-domain --cli-input-json file://../update-domain-no-custom-images.json
+```
