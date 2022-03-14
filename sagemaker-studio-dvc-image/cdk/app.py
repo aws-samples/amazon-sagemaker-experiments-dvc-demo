@@ -2,7 +2,7 @@
 
 from aws_cdk import core
 
-from sagemakerStudioCDK.sagemaker_studio_stack import SagemakerStudioStack, SagemakerStudioUserStack
+from sagemakerStudioCDK.sagemaker_studio_stack import SagemakerStudioStack
 import os
 import boto3
 
@@ -16,9 +16,9 @@ app = core.App()
 
 if domain_id is None:
     print("Create a new studio domain")
-    SagemakerStudioStack(app, "sagemakerStudioCDK", env={"account": account_id, 'region': region})
 else:
     print("Existing domain ID: {}".format(domain_id))
-    SagemakerStudioUserStack(app, "sagemakerUserCDK", domain_id, env={"account": account_id, 'region': region})
+
+SagemakerStudioStack(app, "sagemakerStudioUserCDK", domain_id, env={"account": account_id, 'region': region})
 
 app.synth()
