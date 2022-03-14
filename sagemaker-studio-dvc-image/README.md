@@ -53,16 +53,17 @@ Build the Docker image and push to Amazon ECR.
 aws --region ${REGION} ecr get-login-password | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom
 
 # Create the ECR repository
-aws ecr create-repository --repository-name smstudio-custom
+aws --region ${REGION} ecr create-repository --repository-name smstudio-custom
 
-# Build and push the image
+# Build the image - it might take a few minutes to complete this step
 docker build . -t ${IMAGE_NAME} -t ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAGE_NAME}
+# Push the image to ECR
 docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAGE_NAME}
 ```
 
 Prepare the environment for the CDK deployment.
 
-Step 1: Change directories to the new directory that was created during the previous step:
+Step 1: Navigate to the `cdk` directory:
 
 ```bash
 cd ~/environment/amazon-sagemaker-experiments-dvc-demo/sagemaker-studio-dvc-image/cdk
@@ -148,6 +149,10 @@ git clone https://github.com/aws-samples/amazon-sagemaker-experiments-dvc-demo
 ```
 
 and open the [dvc_sagemaker_byoc.ipynb](../dvc_sagemaker_byoc.ipynb) notebook.
+
+When prompted, ensure that you select the Custom Image `conda-env-dvc-kernel` as shown below
+
+![image info](../img/studio-custom-image-select.png)
 
 ### Cleanup
 
