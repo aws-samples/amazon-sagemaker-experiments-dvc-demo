@@ -75,7 +75,7 @@ def sync_data_with_dvc(branch):
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--train-test-split-ratio", type=float, default=0.3)
-    parser.add_argument("--dvc-repo-url", type=str, default="codecommit::eu-west-1://sagemaker-dvc-sample")
+    parser.add_argument("--dvc-repo-url", type=str, default="https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/sagemaker-dvc-sample")
     parser.add_argument("--dvc-branch", type=str, default="my-experiment")
     args, _ = parser.parse_known_args()
     
@@ -91,3 +91,4 @@ if __name__=="__main__":
     clone_dvc_git_repo(args.dvc_repo_url)
     generate_train_validation_files(args.train_test_split_ratio)
     sync_data_with_dvc(args.dvc_branch)
+    

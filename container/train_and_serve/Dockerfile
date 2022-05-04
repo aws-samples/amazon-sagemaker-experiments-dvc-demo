@@ -11,8 +11,13 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends \
          ca-certificates
 
 RUN pip install numpy==1.16.2 scipy==1.2.1 catboost pandas flask gevent gunicorn
-RUN pip install dvc==2.8.3 s3fs==2021.11.0 dvc[s3]==2.8.3
-RUN pip install git-remote-codecommit
+RUN pip install dvc==2.8.3 s3fs==2021.11.0 dvc[s3]==2.8.3 awscli
+
+# Configure git - change it according to your needs
+RUN git config --global user.email "sagemaker-training@example.com"
+RUN git config --global user.name "SageMaker TrainingJob User"
+RUN git config --global credential.helper '!aws codecommit credential-helper $@'
+RUN git config --global credential.UseHttpPath true
 
 # Set some environment variables. PYTHONUNBUFFERED keeps Python from buffering our standard
 # output stream, which means that logs can be delivered to the user quickly. PYTHONDONTWRITEBYTECODE

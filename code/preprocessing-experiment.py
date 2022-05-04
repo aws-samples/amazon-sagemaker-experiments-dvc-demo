@@ -48,9 +48,9 @@ def sync_data_with_dvc(branch):
         subprocess.check_call(['git', 'checkout', branch])
         print(f"Checkout existing branch: {branch}")
     print("Add files to DVC")
-    subprocess.check_call(['dvc', 'add', 'train/california_train.csv'])
-    subprocess.check_call(['dvc', 'add', 'validation/california_validation.csv'])
-    subprocess.check_call(['dvc', 'add', 'test/california_test.csv'])
+    subprocess.check_call(['dvc', 'add', 'train/'])
+    subprocess.check_call(['dvc', 'add', 'validation/'])
+    subprocess.check_call(['dvc', 'add', 'test/'])
     subprocess.check_call(['git', 'add', '.'])
     subprocess.check_call(['git', 'commit', '-m', f"'add data for {branch}'"])
     print("Push data to DVC")
@@ -65,7 +65,7 @@ def sync_data_with_dvc(branch):
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--train-test-split-ratio", type=float, default=0.3)
-    parser.add_argument("--dvc-repo-url", type=str, default="codecommit::eu-west-1://sagemaker-dvc-sample")
+    parser.add_argument("--dvc-repo-url", type=str, default="https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/sagemaker-dvc-sample")
     parser.add_argument("--dvc-branch", type=str, default="my-experiment")
     args, _ = parser.parse_known_args()
     
