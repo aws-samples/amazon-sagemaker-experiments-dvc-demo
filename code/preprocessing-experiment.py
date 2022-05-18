@@ -14,6 +14,8 @@ from sklearn.model_selection import train_test_split
 
 from smexperiments.tracker import Tracker
 
+import dvc.api
+
 # Read data locally
 input_data_path = os.path.join("/opt/ml/processing/input", "dataset.csv")
 base_dir = './sagemaker-dvc-sample/dataset'
@@ -37,7 +39,7 @@ def generate_train_validation_files(ratio):
     pd.DataFrame(validation).to_csv(f"{base_dir}/validation/california_validation.csv", header=False, index=False)
     pd.DataFrame(test).to_csv(f"{base_dir}/test/california_test.csv", header=False, index=False)
     print("data created")
-
+    
 def sync_data_with_dvc(branch):
     os.chdir(base_dir)
     print(f"Create branch {branch}")

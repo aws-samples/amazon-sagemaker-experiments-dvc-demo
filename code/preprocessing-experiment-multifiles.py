@@ -14,6 +14,8 @@ from sklearn.model_selection import train_test_split
 
 from smexperiments.tracker import Tracker
 
+import dvc.api
+
 # Read data locally
 input_data_path = os.path.join("/opt/ml/processing/input", "dataset.csv")
 
