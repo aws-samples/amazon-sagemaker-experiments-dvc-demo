@@ -20,8 +20,12 @@ base_dir = './sagemaker-dvc-sample/dataset'
 
 dvc_repo_url = os.environ.get('DVC_REPO_URL')
 dvc_branch = os.environ.get('DVC_BRANCH')
-user = os.environ.get('USER', "SageMaker ProcessingJob User")
+user = os.environ.get('USER', "sagemaker")
 
+def configure_git():
+    subprocess.check_call(['git', 'config', '--global', 'user.email', '"sagemaker-processing@example.com"'])
+    subprocess.check_call(['git', 'config', '--global', 'user.name', user])
+    
 def split_dataframe(df, num=5):
     chunk_size = int(df.shape[0] / num)
     chunks = [df.iloc[i:i+chunk_size] for i in range(0,df.shape[0], chunk_size)]
@@ -66,10 +70,6 @@ def sync_data_with_dvc():
     subprocess.check_call(['dvc', 'add', 'test/'])
     subprocess.check_call(['git', 'add', '.'])
     
-    # Configure git - you can customize it
-    subprocess.check_call(['git', 'config', '--global', 'user.email', '"sagemaker-processing@example.com"'])
-    subprocess.check_call(['git', 'config', '--global', 'user.name', user])
-    
     subprocess.check_call(['git', 'commit', '-m', f"'add data for {dvc_branch}'"])
     print("Push data to DVC")
     subprocess.check_call(['dvc', 'push'])
@@ -90,13 +90,11 @@ if __name__=="__main__":
     with Tracker.load() as tracker:
         tracker.log_parameters(
             {
-                "data_repo_url": dvc_repo_url,
-                "train_test_split_ratio": train_test_split_ratio,
-                "data_branch": dvc_branch,
-                "user": user
+                "train_test_split_ratio": train_test_split_ratio
             }
         )
     
+    configure_git()
     clone_dvc_git_repo()
     generate_train_validation_files(train_test_split_ratio)
     sync_data_with_dvc()

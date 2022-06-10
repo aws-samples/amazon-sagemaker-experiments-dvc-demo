@@ -29,8 +29,11 @@ model_file_name = 'catboost-regressor-model.dump'
 train_path = os.path.join(dataset_path, train_channel_name)
 validation_path = os.path.join(dataset_path, validation_channel_name)
 
-def fetch_data_from_dvc(dvc_repo_url, dvc_branch):
-    print(f"Configure git to pull authenticated from CodeCommit")
+dvc_repo_url = os.environ.get('DVC_REPO_URL')
+dvc_branch = os.environ.get('DVC_BRANCH')
+user = os.environ.get('USER', "sagemaker")
+
+def fetch_data_from_dvc():
     print(f"Cloning repo: {dvc_repo_url}, git branch: {dvc_branch}")
     subprocess.check_call(["git", "clone", "--depth", "1", "--branch", dvc_branch, dvc_repo_url, input_path])
     print("dvc pull")
@@ -56,11 +59,8 @@ if __name__ == '__main__':
     parser.add_argument("--depth", type=int, default=5)
     
     args, _ = parser.parse_known_args()
-    
-    dvc_repo_url = os.environ.get('DVC_REPO_URL')
-    dvc_branch = os.environ.get('DVC_BRANCH')
 
-    fetch_data_from_dvc(dvc_repo_url, dvc_branch)
+    fetch_data_from_dvc()
     
     print('Starting the training.')
 
@@ -117,9 +117,6 @@ if __name__ == '__main__':
         for q in [10, 50, 90]:
             print('AE-at-' + str(q) + 'th-percentile: '+ str(np.percentile(a=abs_err, q=q)))
 
-        # persist model
-        # path = os.path.join(model_path, model_file_name)
-        # joblib.dump(model, path)
         path = os.path.join(model_path, model_file_name)
         model.save_model(path)
 
