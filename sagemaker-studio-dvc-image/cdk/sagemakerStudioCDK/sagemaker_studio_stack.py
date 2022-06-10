@@ -8,6 +8,29 @@ from aws_cdk import (
 	core
 )
 
+sagemaker_arn_region_account_mapping = {
+	"eu-west-1": "470317259841",
+	"us-east-1": "081325390199",
+	"us-east-2": "429704687514",
+	"us-west-1": "742091327244",
+	"us-west-2": "236514542706",
+	"af-south-1": "559312083959",
+	"ap-east-1": "493642496378",
+	"ap-south-1": "394103062818",
+	"ap-northeast-2": "806072073708",
+	"ap-southeast-1": "492261229750",
+	"ap-southeast-2": "452832661640",
+	"ap-northeast-1": "102112518831",
+	"ca-central-1": "310906938811",
+	"eu-central-1": "936697816551",
+	"eu-west-2": "712779665605",
+	"eu-west-3": "615547856133",
+	"eu-north-1": "243637512696",
+	"eu-south-1": "592751261982",
+	"sa-east-1": "782484402741",
+}
+
+
 class SagemakerStudioStack(core.Stack):
 
 	def __init__(self, scope: core.Construct, construct_id: str, domain_id: str, **kwargs) -> None:
@@ -189,7 +212,13 @@ class SagemakerStudioStack(core.Stack):
 			                	image_name="conda-env-dvc-kernel",
 			            	)
 			            ]
-			        )
+			        ),
+					jupyter_server_app_settings=sagemaker.CfnUserProfile.JupyterServerAppSettingsProperty(
+						default_resource_spec=sagemaker.CfnUserProfile.ResourceSpecProperty(
+							instance_type="system",
+							sage_maker_image_arn="arn:aws:sagemaker:{}:{}:image/jupyter-server-3".format(self.region, sagemaker_arn_region_account_mapping[self.region]),
+						)
+					),
 			    )
 			)
 			
@@ -220,8 +249,14 @@ class SagemakerStudioStack(core.Stack):
 			                	app_image_config_name="conda-env-dvc-kernel-config",
 			                	image_name="conda-env-dvc-kernel",
 			            )]
-			        )
-			    ),
+			        ),
+					jupyter_server_app_settings=sagemaker.CfnUserProfile.JupyterServerAppSettingsProperty(
+						default_resource_spec=sagemaker.CfnUserProfile.ResourceSpecProperty(
+							instance_type="system",
+							sage_maker_image_arn="arn:aws:sagemaker:{}:{}:image/jupyter-server-3".format(self.region, sagemaker_arn_region_account_mapping[self.region]),
+						)
+					),
+				),
 			    domain_name="domain-with-custom-conda-env",
 			    subnet_ids=self.public_subnet_ids,
 			    vpc_id=self.vpc_id
