@@ -16,4 +16,5 @@ dependencies:
     - sagemaker-studio-image-build==0.6.0
     - sagemaker-experiments==0.1.35
     - scikit-learn==1.0.2
+    - protobuf==3.20
 
