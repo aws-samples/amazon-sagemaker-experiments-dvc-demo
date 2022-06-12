@@ -250,8 +250,8 @@ class SagemakerStudioStack(core.Stack):
 			                	image_name="conda-env-dvc-kernel",
 			            )]
 			        ),
-					jupyter_server_app_settings=sagemaker.CfnUserProfile.JupyterServerAppSettingsProperty(
-						default_resource_spec=sagemaker.CfnUserProfile.ResourceSpecProperty(
+					jupyter_server_app_settings=sagemaker.CfnDomain.JupyterServerAppSettingsProperty(
+						default_resource_spec=sagemaker.CfnDomain.ResourceSpecProperty(
 							instance_type="system",
 							sage_maker_image_arn="arn:aws:sagemaker:{}:{}:image/jupyter-server-3".format(self.region, sagemaker_arn_region_account_mapping[self.region]),
 						)
