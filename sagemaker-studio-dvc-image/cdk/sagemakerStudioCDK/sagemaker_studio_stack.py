@@ -5,8 +5,11 @@ from aws_cdk import (
 	aws_iam as iam,
 	aws_ec2 as ec2,
 	aws_sagemaker as sagemaker,
-	core
+	Stack,
+	CfnOutput
 )
+
+from constructs import Construct
 
 sagemaker_arn_region_account_mapping = {
 	"eu-west-1": "470317259841",
@@ -31,9 +34,9 @@ sagemaker_arn_region_account_mapping = {
 }
 
 
-class SagemakerStudioStack(core.Stack):
+class SagemakerStudioStack(Stack):
 
-	def __init__(self, scope: core.Construct, construct_id: str, domain_id: str, **kwargs) -> None:
+	def __init__(self, scope: Construct, construct_id: str, domain_id: str, **kwargs) -> None:
 		super().__init__(scope, construct_id, **kwargs)
 		
 		# Create a SageMaker
@@ -44,7 +47,6 @@ class SagemakerStudioStack(core.Stack):
 		    	iam.ServicePrincipal('sagemaker.amazonaws.com'),
 				iam.ServicePrincipal('codebuild.amazonaws.com'), # needed to use the sm-build command
 	    	),
-		    role_name="RoleSagemakerStudioUsers",
 		    managed_policies=[
 				iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSageMakerFullAccess"),
 				iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeBuildAdminAccess"),
@@ -274,7 +276,7 @@ class SagemakerStudioStack(core.Stack):
 			    )
 			)
 			
-			core.CfnOutput(
+			CfnOutput(
 				self,
 				"DomainIdSagemaker",
 			    value=my_sagemaker_domain.attr_domain_id,
@@ -283,7 +285,7 @@ class SagemakerStudioStack(core.Stack):
 			)
 
 
-		core.CfnOutput(
+		CfnOutput(
 			self,
 			f"cfnoutput{team}",
 		    value=my_default_datascience_user.attr_user_profile_arn,

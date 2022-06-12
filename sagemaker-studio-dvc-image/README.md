@@ -90,6 +90,13 @@ pip3 install --upgrade pip
 pip3 install -r requirements.txt
 ```
 
+Step 5: Install and bootstrap CDK v2
+
+```bash
+npm install -g aws-cdk@2.27.0 --force
+cdk bootstrap
+```
+
 ### Create a new SageMaker Studio
 ( Skip to [Update an existing SageMaker Studio](#update-an-existing-sagemaker-studio) if you have already an existing SageMaker Studio domain)
 
