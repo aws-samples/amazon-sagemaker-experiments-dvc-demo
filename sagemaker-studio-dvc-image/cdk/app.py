@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from aws_cdk import core
+from aws_cdk import App, Stack
 
 from sagemakerStudioCDK.sagemaker_studio_stack import SagemakerStudioStack
 import os
@@ -12,7 +12,7 @@ region = os.environ.get('REGION', 'eu-west-1')
 
 domain_id = os.environ.get('DOMAIN_ID', None)
 
-app = core.App()
+app = App()
 
 if domain_id is None:
     print("Create a new studio domain")
