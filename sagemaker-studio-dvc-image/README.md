@@ -30,7 +30,7 @@ cd ~/environment/amazon-sagemaker-experiments-dvc-demo/sagemaker-studio-dvc-imag
 ./resize-cloud9.sh 20
 ```
 
-## Prepare environment
+## Build the Docker images for SageMaker Studio
 
 Set some basic environment variables
 
@@ -61,7 +61,9 @@ docker build . -t ${IMAGE_NAME} -t ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
 docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:${IMAGE_NAME}
 ```
 
-Prepare the environment for the CDK deployment.
+## Associate a custom image to SageMaker Studio
+
+### Prepare the environment to deploy with CDK
 
 Step 1: Navigate to the `cdk` directory:
 
