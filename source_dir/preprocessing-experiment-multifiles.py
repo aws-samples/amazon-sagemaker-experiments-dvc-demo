@@ -14,9 +14,13 @@ from sklearn.model_selection import train_test_split
 
 from smexperiments.tracker import Tracker
 
+import dvc.api
+
 # Prepare paths
 input_data_path = os.path.join("/opt/ml/processing/input", "dataset.csv")
-base_dir = './sagemaker-dvc-sample/dataset'
+data_path = 'dataset'
+base_dir = f"./sagemaker-dvc-sample/{data_path}"
+file_types = ['test','train','validation']
 
 dvc_repo_url = os.environ.get('DVC_REPO_URL')
 dvc_branch = os.environ.get('DVC_BRANCH')
@@ -65,11 +69,11 @@ def sync_data_with_dvc():
         subprocess.check_call(['git', 'checkout', dvc_branch])
         print(f"Checkout existing branch: {dvc_branch}")
     print("Add files to DVC")
-    subprocess.check_call(['dvc', 'add', 'train/'])
-    subprocess.check_call(['dvc', 'add', 'validation/'])
-    subprocess.check_call(['dvc', 'add', 'test/'])
-    subprocess.check_call(['git', 'add', '.'])
     
+    for file_type in file_types:
+        subprocess.check_call(['dvc', 'add', f"{file_type}/"])
+
+    subprocess.check_call(['git', 'add', '.'])
     subprocess.check_call(['git', 'commit', '-m', f"'add data for {dvc_branch}'"])
     print("Push data to DVC")
     subprocess.check_call(['dvc', 'push'])
@@ -77,8 +81,16 @@ def sync_data_with_dvc():
     subprocess.check_call(['git', 'push', '--set-upstream', 'origin', dvc_branch, '--force'])
     commit_hash = subprocess.check_output(['git', 'log', '--format=%H', '-n', '1']).decode("utf-8").replace('\n','')
     print(f"commit hash: {commit_hash}")
+
     with Tracker.load() as tracker:
         tracker.log_parameters({"data_commit_hash": commit_hash})
+        for file_type in file_types:
+            path = dvc.api.get_url(
+                f"{data_path}/{file_type}",
+                repo=dvc_repo_url,
+                rev=dvc_branch
+            )
+            tracker.log_output(name=f"{file_type}",value=path)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
