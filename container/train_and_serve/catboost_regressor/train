@@ -30,9 +30,12 @@ validation_path = os.path.join(dataset_path, validation_channel_name)
 
 param_path = os.path.join(prefix, 'input/config/hyperparameters.json')
 
+dvc_repo_url = os.environ.get('DVC_REPO_URL')
+dvc_branch = os.environ.get('DVC_BRANCH')
+user = os.environ.get('USER', "sagemaker")
 
 # The function to execute the training.
-def train():
+def train(learning_rate, depth):
     print('Starting the training.')
 
     try:
@@ -76,7 +79,7 @@ def train():
         y_validation = validation_df.iloc[:, 0:1].values
 
         # define and train model
-        model = CatBoostRegressor()
+        model = CatBoostRegressor(learning_rate=int(learning_rate), depth=int(depth))
 
         model.fit(X_train, y_train, eval_set=(X_validation, y_validation), logging_level='Silent')
 
@@ -115,7 +118,7 @@ def get_hyperparameters():
     return hyperparameters_data
 
 
-def clone_dvc_git_repo(dvc_repo_url, dvc_branch):
+def clone_dvc_git_repo():
     print(f"Configure git to pull authenticated from CodeCommit")
     print(f"Cloning repo: {dvc_repo_url}, git branch: {dvc_branch}")
     subprocess.check_call(["git", "clone", "--depth", "1", "--branch", dvc_branch, dvc_repo_url, input_path])
@@ -130,9 +133,9 @@ def dvc_pull():
 if __name__ == '__main__':
 
     hyperparameters = get_hyperparameters()
-    clone_dvc_git_repo(hyperparameters["dvc-repo-url"], hyperparameters["dvc-branch"])
+    clone_dvc_git_repo()
     dvc_pull()
-    train()
+    train(hyperparameters['learning_rate'], hyperparameters['depth'])
 
     # A zero exit dependencies causes the job to be marked a Succeeded.
     sys.exit(0)
