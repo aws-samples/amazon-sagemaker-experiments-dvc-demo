@@ -38,7 +38,7 @@ class SagemakerStudioStack(Stack):
 
 	def __init__(self, scope: Construct, construct_id: str, domain_id: str, **kwargs) -> None:
 		super().__init__(scope, construct_id, **kwargs)
-		
+
 		# Create a SageMaker
 		role_sagemaker_studio_domain = iam.Role(
 			self,
@@ -48,17 +48,48 @@ class SagemakerStudioStack(Stack):
 				iam.ServicePrincipal('codebuild.amazonaws.com'), # needed to use the sm-build command
 	    	),
 		    managed_policies=[
-				iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSageMakerFullAccess"),
-				iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeBuildAdminAccess"),
-                iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeCommitFullAccess")
+				iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSageMakerFullAccess")
 			],
 			inline_policies={
+				"code-commit-policy": iam.PolicyDocument(
+						statements=[
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
+							actions=[
+					            "codecommit:AssociateApprovalRuleTemplateWithRepository",
+					            "codecommit:BatchAssociateApprovalRuleTemplateWithRepositories",
+					            "codecommit:BatchDisassociateApprovalRuleTemplateFromRepositories",
+					            "codecommit:BatchGet*",
+					            "codecommit:BatchDescribe*",
+					            "codecommit:Create*",
+					            "codecommit:DeleteBranch",
+					            "codecommit:DeleteFile",
+					            "codecommit:Describe*",
+					            "codecommit:DisassociateApprovalRuleTemplateFromRepository",
+					            "codecommit:EvaluatePullRequestApprovalRules",
+					            "codecommit:Get*",
+					            "codecommit:List*",
+					            "codecommit:Merge*",
+					            "codecommit:OverridePullRequestApprovalRules",
+					            "codecommit:Put*",
+					            "codecommit:Post*",
+					            "codecommit:TagResource",
+					            "codecommit:Test*",
+					            "codecommit:UntagResource",
+					            "codecommit:Update*",
+					            "codecommit:GitPull",
+					            "codecommit:GitPush"
+					        ],
+							resources=[f"arn:aws:codecommit:{self.region}:{self.account}:sagemaker-dvc-sample"]
+						)
+					]
+				),
 				"s3bucket": iam.PolicyDocument(
-    				statements=[
-    					iam.PolicyStatement(
-    						effect=iam.Effect.ALLOW,
+					statements=[
+						iam.PolicyStatement(
+							effect=iam.Effect.ALLOW,
 							actions=["s3:ListBucket","s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:PutObjectTagging"],
-							resources=["*"]
+							resources=["arn:aws:s3:::sagemaker*"]
     					)
     				]
 				),
@@ -122,28 +153,8 @@ class SagemakerStudioStack(Stack):
 						),
 						iam.PolicyStatement(
 							effect=iam.Effect.ALLOW,
-							actions=[
-								"logs:CreateLogGroup"
-							],
-							resources=["*"]
-						),
-						iam.PolicyStatement(
-							effect=iam.Effect.ALLOW,
 							actions=["ecr:GetAuthorizationToken"],
-							resources=["*"]
-						),
-						iam.PolicyStatement(
-							effect=iam.Effect.ALLOW,
-							actions=["s3:CreateBucket"],
-							resources=["arn:aws:s3:::sagemaker*"]
-						),
-						iam.PolicyStatement(
-							effect=iam.Effect.ALLOW,
-							actions=[
-								"iam:GetRole",
-                				"iam:ListRoles"
-                			],
-                			resources=["*"]
+							resources=["arn:aws:ecr:*:*:*"]
 						),
 						iam.PolicyStatement(
 							effect=iam.Effect.ALLOW,
