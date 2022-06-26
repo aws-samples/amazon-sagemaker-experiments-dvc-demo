@@ -16,6 +16,8 @@ from smexperiments.tracker import Tracker
 
 import dvc.api
 
+from git.repo.base import Repo
+
 # Prepare paths
 input_data_path = os.path.join("/opt/ml/processing/input", "dataset.csv")
 data_path = 'dataset'
@@ -37,7 +39,8 @@ def split_dataframe(df, num=5):
 
 def clone_dvc_git_repo():
     print(f"Cloning repo: {dvc_repo_url}")
-    subprocess.check_call(["git", "clone", dvc_repo_url])
+    repo = Repo.clone_from(dvc_repo_url, './sagemaker-dvc-sample')
+    return repo
 
 def generate_train_validation_files(ratio):
     for path in ['train', 'validation', 'test']:
@@ -59,31 +62,33 @@ def generate_train_validation_files(ratio):
     pd.DataFrame(test).to_csv(f"{base_dir}/test/california_test.csv", header=False, index=False)
     print("data created")
 
-def sync_data_with_dvc():
+def sync_data_with_dvc(repo):
     os.chdir(base_dir)
     print(f"Create branch {dvc_branch}")
     try:
-        subprocess.check_call(['git', 'checkout', '-b', dvc_branch])
+        repo.git.checkout('-b', dvc_branch)
         print(f"Create a new branch: {dvc_branch}")
     except:
-        subprocess.check_call(['git', 'checkout', dvc_branch])
+        repo.git.checkout(dvc_branch)
         print(f"Checkout existing branch: {dvc_branch}")
     print("Add files to DVC")
     
     for file_type in file_types:
         subprocess.check_call(['dvc', 'add', f"{file_type}/"])
 
-    subprocess.check_call(['git', 'add', '.'])
-    subprocess.check_call(['git', 'commit', '-m', f"'add data for {dvc_branch}'"])
+    repo.git.add(all=True)
+    repo.git.commit('-m', f"'add data for {dvc_branch}'")
     print("Push data to DVC")
     subprocess.check_call(['dvc', 'push'])
     print("Push dvc metadata to git")
-    subprocess.check_call(['git', 'push', '--set-upstream', 'origin', dvc_branch, '--force'])
-    commit_hash = subprocess.check_output(['git', 'log', '--format=%H', '-n', '1']).decode("utf-8").replace('\n','')
-    print(f"commit hash: {commit_hash}")
+    repo.remote(name='origin')
+    repo.git.push('--set-upstream', repo.remote().name, dvc_branch, '--force')
+
+    sha = repo.head.commit.hexsha
+    print(f"commit hash: {sha}")
 
     with Tracker.load() as tracker:
-        tracker.log_parameters({"data_commit_hash": commit_hash})
+        tracker.log_parameters({"data_commit_hash": sha})
         for file_type in file_types:
             path = dvc.api.get_url(
                 f"{data_path}/{file_type}",
@@ -107,6 +112,6 @@ if __name__=="__main__":
         )
     
     configure_git()
-    clone_dvc_git_repo()
+    repo = clone_dvc_git_repo()
     generate_train_validation_files(train_test_split_ratio)
-    sync_data_with_dvc()
+    sync_data_with_dvc(repo)
