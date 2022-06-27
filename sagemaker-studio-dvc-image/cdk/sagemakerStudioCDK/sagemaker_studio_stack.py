@@ -78,7 +78,8 @@ class SagemakerStudioStack(Stack):
 					            "codecommit:UntagResource",
 					            "codecommit:Update*",
 					            "codecommit:GitPull",
-					            "codecommit:GitPush"
+					            "codecommit:GitPush",
+					            "codecommit:Delete*"
 					        ],
 							resources=[f"arn:aws:codecommit:{self.region}:{self.account}:sagemaker-dvc-sample"]
 						)
