@@ -157,7 +157,7 @@ Open a terminal and clone the repository
 git clone https://github.com/aws-samples/amazon-sagemaker-experiments-dvc-demo
 ```
 
-and open the [dvc_sagemaker_byoc.ipynb](../dvc_sagemaker_byoc.ipynb) notebook.
+and open the [dvc_sagemaker_script_mode.ipynb](../dvc_sagemaker_script_mode.ipynb) notebook.
 
 When prompted, ensure that you select the Custom Image `conda-env-dvc-kernel` as shown below
 
