@@ -2,14 +2,18 @@
 
 This sample shows how to use DVC within the SageMaker environment.
 In particular, we will look at how to build a custom image with DVC libraries installed by default to provide a consistent environment to your data scientists.
-FUrthermore, we show how you can integrate SageMaker Processing, SageMaker Trainings and SageMaker Experiments with a DVC workflow.
+Furthermore, we show how you can integrate SageMaker Processing, SageMaker Trainings and SageMaker Experiments with a DVC workflow.
+
+For full details on how this works:
+
+- Read the Blog post at: https://aws.amazon.com/blogs/machine-learning/track-your-ml-experiments-end-to-end-with-data-version-control-and-amazon-sagemaker-experiments/
 
 ## Prerequisite
 
 * An AWS Account
 * An IAM user with Admin-like permissions
 
-If you do not have Admin-like permissions, we reccomend to have at least the following permissions:
+If you do not have Admin-like permissions, we recommend to have at least the following permissions:
 * Administer Amazon ECR
 * Administer a SageMaker Studio Domain
 * Administer S3 (or at least any buckets with *sagemaker* in the bucket name)
