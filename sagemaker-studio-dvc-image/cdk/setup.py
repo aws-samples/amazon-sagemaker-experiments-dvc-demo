@@ -13,7 +13,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="sagemakerStudioCDK"),
 
     install_requires=[
-        "aws-cdk-lib==2.27.0",
+        "aws-cdk-lib==2.253.0",
         "constructs==10.0.34",
         "boto3"
     ],
